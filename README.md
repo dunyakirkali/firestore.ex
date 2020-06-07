@@ -9,6 +9,12 @@ Firestore is a gRPC client for Firebase Firestore written in Elixir.
 
 Documentation can be found [here](https://hexdocs.pm/firestore).
 
+Used the following command the generate the protos:
+
+```
+protoc -I /Users/dunyakirkali/Projects/Dott/Experiments/googleapis/ --elixir_out=plugins=grpc:lib/protos/ /Users/dunyakirkali/Projects/Dott/Experiments/googleapis/google/firestore/**/*.proto
+```
+
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed

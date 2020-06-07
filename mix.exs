@@ -21,7 +21,10 @@ defmodule Firestore.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:goth, "~> 1.1.0"}
+      {:goth, "~> 1.2.0"},
+      {:protobuf, "~> 0.7.1"},
+      {:google_protos, "~> 0.1"},
+      {:grpc, github: "elixir-grpc/grpc"}
     ]
   end
 end
