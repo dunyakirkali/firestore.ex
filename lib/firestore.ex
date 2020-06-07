@@ -1,18 +1,7 @@
 defmodule Firestore do
-  @moduledoc """
-  Documentation for `Firestore`.
-  """
+  alias Goth.Token
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Firestore.hello()
-      :world
-
-  """
   def hello do
-    :world
+    {:ok, token} = Token.for_scope("https://www.googleapis.com/auth/pubsub")
   end
 end
