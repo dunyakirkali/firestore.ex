@@ -1,6 +1,13 @@
 # Firestore
 
-**TODO: Add description**
+[![Build Status](https://travis-ci.org/ahtung/firestore.ex.svg?branch=master)](https://travis-ci.org/ahtung/firestore.ex)
+[![Coverage Status](https://coveralls.io/repos/ahtung/firestore.ex/badge.svg?branch=master)](https://coveralls.io/r/ahtung/firestore.ex?branch=master)
+[![Hex.pm version](https://img.shields.io/hexpm/v/firestore.svg?style=flat-square)](https://hex.pm/packages/firestore)
+[![Hex.pm downloads](https://img.shields.io/hexpm/dt/firestore.svg)](https://hex.pm/packages/firestore)
+
+Firestore is a gRPC client for Firebase Firestore written in Elixir.
+
+Documentation can be found [here](https://hexdocs.pm/firestore).
 
 ## Installation
 
