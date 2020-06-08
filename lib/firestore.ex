@@ -26,7 +26,7 @@ defmodule Firestore do
       page_size: 10
     )
 
-    {:ok, reply} = channel |> Google.Firestore.V1.Firestore.Stub.list_documents(request)
+    {:ok, reply} = channel |> Google.Firestore.V1.Firestore.Stub.list_documents(request, content_type: "application/grpc")
 
     reply
   end
