@@ -2,6 +2,8 @@ defmodule Firestore do
   alias Goth.Token
   alias Google.Firestore.V1
 
+  @parent "projects/gele-b64ed/databases/(default)/documents"
+
   defp get_token do
     Token.for_scope("https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/datastore")
   end
@@ -27,46 +29,53 @@ defmodule Firestore do
 
   def list_collection_ids(channel) do
     request = V1.ListCollectionIdsRequest.new(
-      parent: "projects/gele-b64ed/databases/(default)/documents",
+      parent: @parent,
       page_size: 10
     )
 
-    channel
-    |> V1.Firestore.Stub.list_collection_ids(request, content_type: "application/grpc")
+    V1.Firestore.Stub.list_collection_ids(channel, request, content_type: "application/grpc")
+  end
+
+  def list_documents(channel, collection) do
+    request = V1.ListDocumentsRequest.new(
+      parent: @parent,
+      page_size: 10_000,
+      collection_id: collection
+    )
+
+    V1.Firestore.Stub.list_documents(channel, request, content_type: "application/grpc")
+  end
+
+  def create_document(channel, collection, document) do
+    request = V1.CreateDocumentRequest.new(
+      parent: @parent,
+      collection_id: collection,
+      document: document
+    )
+
+    V1.Firestore.Stub.create_document(channel, request, content_type: "application/grpc")
   end
 
   def hello do
     {:ok, channel} = create_channel()
+
     {:ok, reply} = list_collection_ids(channel)
 
-    # Get Documents from the first collection
     last_collection = List.last(reply.collection_ids)
-    request = V1.ListDocumentsRequest.new(
-      parent: "projects/gele-b64ed/databases/(default)/documents",
-      page_size: 10_000,
-      collection_id: last_collection
-    )
+    {:ok, reply} = list_documents(channel, last_collection)
 
-    {:ok, reply} = channel |> V1.Firestore.Stub.list_documents(request, content_type: "application/grpc")
-                   |> IO.inspect
+    Enum.each(0..10, fn _ ->
+      uuid = UUID.uuid1()
 
-    # Create documents
-    # Enum.each(0..10_000, fn _ ->
-    #   uuid = UUID.uuid1()
-    #   value = V1.Value.new(
-    #     value_type: {:string_value, uuid}
-    #   )
-    #   document = V1.Document.new(
-    #     fields: %{"name" => value} 
-    #   )
-    #   request = V1.CreateDocumentRequest.new(
-    #     parent: "projects/gele-b64ed/databases/(default)/documents",
-    #     collection_id: "vehicles",
-    #     document: document
-    #   )
+      value = V1.Value.new(
+        value_type: {:string_value, uuid}
+      )
 
-    #   {:ok, reply} = channel |> V1.Firestore.Stub.create_document(request, content_type: "application/grpc")
-    # end)
-    Enum.count(reply.documents)
+      document = V1.Document.new(
+        fields: %{"name" => value} 
+      )
+
+      create_document(channel, "vehicles", document)
+    end)
   end
 end
