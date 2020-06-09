@@ -46,6 +46,9 @@ defmodule Firestore do
     V1.Firestore.Stub.list_documents(channel, request, content_type: "application/grpc")
   end
 
+  @doc """
+  https://firebase.google.com/docs/firestore/reference/rpc/google.firestore.v1#google.firestore.v1.Firestore.CreateDocument
+  """
   def create_document(channel, collection, document) do
     request = V1.CreateDocumentRequest.new(
       parent: @parent,
@@ -77,5 +80,9 @@ defmodule Firestore do
 
       create_document(channel, "vehicles", document)
     end)
+
+    reply.documents
+    |> Enum.count()
+    |> IO.inspect
   end
 end
