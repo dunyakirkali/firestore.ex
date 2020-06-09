@@ -2,10 +2,14 @@ defmodule Firestore do
   alias Goth.Token
   alias Google.Firestore.V1
 
-  @parent "projects/gele-b64ed/databases/(default)/documents"
+  @database "projects/gele-b64ed/databases/(default)"
+  @parent "#{@database}/documents"
+  @scopes ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/datastore"]
 
   defp get_token do
-    Token.for_scope("https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/datastore")
+    @scopes
+    |> Enum.join(" ")
+    |> Token.for_scope()
   end
 
   defp create_channel do
@@ -59,6 +63,34 @@ defmodule Firestore do
     V1.Firestore.Stub.create_document(channel, request, content_type: "application/grpc")
   end
 
+  @doc """
+  https://firebase.google.com/docs/firestore/reference/rpc/google.firestore.v1#google.firestore.v1.Firestore.Listen
+  """
+  def listen(channel) do
+    document_target = V1.Target.DocumentsTarget.new(
+      documents: ["projects/gele-b64ed/databases/(default)/documents/vehicles/4225Ii69RoVYF0ddSKvw"]
+    )
+    target = V1.Target.new(
+      target_type: {:documents, document_target}
+    )
+    request = V1.ListenRequest.new(
+      database: @database,
+      target_change: {:add_target, target}
+    )
+    |> IO.inspect
+
+    stream = V1.Firestore.Stub.listen(channel)
+    GRPC.Stub.send_request(stream, request, end_stream: true)
+    do_listen(stream)
+  end
+
+  defp do_listen(stream) do
+    {:ok, reply_enum} = GRPC.Stub.recv(stream)
+    replies = Enum.map(reply_enum, fn({:ok, reply}) -> reply end)
+              |> IO.inspect
+    do_listen(stream)
+  end
+
   def hello do
     {:ok, channel} = create_channel()
 
@@ -67,22 +99,27 @@ defmodule Firestore do
     last_collection = List.last(reply.collection_ids)
     {:ok, reply} = list_documents(channel, last_collection)
 
-    Enum.each(0..10, fn _ ->
-      uuid = UUID.uuid1()
-
-      value = V1.Value.new(
-        value_type: {:string_value, uuid}
-      )
-
-      document = V1.Document.new(
-        fields: %{"name" => value} 
-      )
-
-      create_document(channel, "vehicles", document)
-    end)
-
-    reply.documents
-    |> Enum.count()
+    List.last(reply.documents)
     |> IO.inspect
+
+    # Enum.each(0..10, fn _ ->
+    #   uuid = UUID.uuid1()
+
+    #   value = V1.Value.new(
+    #     value_type: {:string_value, uuid}
+    #   )
+
+    #   document = V1.Document.new(
+    #     fields: %{"name" => value} 
+    #   )
+
+    #   create_document(channel, "vehicles", document)
+    # end)
+
+    listen(channel)
+
+    # reply.documents
+    # |> Enum.count()
+    # |> IO.inspect
   end
 end
