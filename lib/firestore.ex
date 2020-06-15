@@ -40,11 +40,12 @@ defmodule Firestore do
     V1.Firestore.Stub.list_collection_ids(channel, request, content_type: "application/grpc")
   end
 
-  def list_documents(channel, collection) do
+  def list_documents(channel, collection, next_page_token \\ nil) do
     request = V1.ListDocumentsRequest.new(
       parent: @parent,
-      page_size: 10_000,
-      collection_id: collection
+      page_size: 301,
+      collection_id: collection,
+      page_token: next_page_token
     )
 
     V1.Firestore.Stub.list_documents(channel, request, content_type: "application/grpc")
@@ -75,12 +76,13 @@ defmodule Firestore do
     )
     request = V1.ListenRequest.new(
       database: @database,
-      target_change: {:add_target, target}
+      target_change: {:add_target, target},
+      labels: %{"type" => "string" }
     )
     |> IO.inspect
 
     stream = V1.Firestore.Stub.listen(channel)
-    GRPC.Stub.send_request(stream, request, end_stream: true)
+    GRPC.Stub.send_request(stream, request, end_stream: false)
     do_listen(stream)
   end
 
@@ -95,12 +97,16 @@ defmodule Firestore do
     {:ok, channel} = create_channel()
 
     {:ok, reply} = list_collection_ids(channel)
+    IO.inspect(reply, label: "Collection IDs")
 
-    last_collection = List.last(reply.collection_ids)
-    {:ok, reply} = list_documents(channel, last_collection)
+    {:ok, reply} = list_documents(channel, "vehicles")
+    IO.inspect(reply, label: "Documents")
 
-    List.last(reply.documents)
-    |> IO.inspect
+    reply.documents
+    |> Enum.count
+    |> IO.inspect(label: "Page")
+    # List.last(reply.documents)
+    # |> IO.inspect
 
     # Enum.each(0..10, fn _ ->
     #   uuid = UUID.uuid1()
@@ -116,7 +122,7 @@ defmodule Firestore do
     #   create_document(channel, "vehicles", document)
     # end)
 
-    listen(channel)
+    # listen(channel)
 
     # reply.documents
     # |> Enum.count()
