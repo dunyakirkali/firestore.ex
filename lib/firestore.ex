@@ -40,10 +40,41 @@ defmodule Firestore do
     V1.Firestore.Stub.list_collection_ids(channel, request, content_type: "application/grpc")
   end
 
-  def list_documents(channel, collection, next_page_token \\ nil) do
+  def list_documents(channel, collection) do
+    start = fn ->
+      {[], nil}
+    end
+
+    pop_item = fn {[head|tail], next} ->
+      new_state = {tail, next}
+      {[head], new_state}
+    end
+
+    fetch_next_page = fn state = {[], next_page} ->
+      case do_list_documents(channel, collection, next_page) do
+        {:ok, %{documents: items, next_page_token: page_token}} ->
+          pop_item.({items, page_token})
+        _ ->
+          {:halt, state}
+      end
+    end
+
+    next_item = fn state = {[], ""}  -> {:halt, state}
+      state = {[], next} -> fetch_next_page.(state)
+      state              -> pop_item.(state)
+    end
+
+    stop = fn(state) ->
+      elem(state, 0)
+    end
+
+    Stream.resource(start, next_item, stop)
+  end
+
+  def do_list_documents(channel, collection, next_page_token \\ nil) do
     request = V1.ListDocumentsRequest.new(
       parent: @parent,
-      page_size: 301,
+      page_size: 2,
       collection_id: collection,
       page_token: next_page_token
     )
@@ -99,13 +130,18 @@ defmodule Firestore do
     {:ok, reply} = list_collection_ids(channel)
     IO.inspect(reply, label: "Collection IDs")
 
-    {:ok, reply} = list_documents(channel, "vehicles")
-    IO.inspect(reply, label: "Documents")
+    # {:ok, reply} = list_documents(channel, "vehicles")
+    # IO.inspect(reply, label: "Documents")
 
-    reply.documents
+    list_documents(channel, "vehicles")
+    |> Enum.into([])
+    |> IO.inspect
     |> Enum.count
-    |> IO.inspect(label: "Page")
-    # List.last(reply.documents)
+
+    # reply.documents
+    # |> Enum.count
+    # |> IO.inspect(label: "Page")
+    # # List.last(reply.documents)
     # |> IO.inspect
 
     # Enum.each(0..10, fn _ ->
