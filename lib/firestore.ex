@@ -2,9 +2,11 @@ defmodule Firestore do
   alias Goth.Token
   alias Google.Firestore.V1
 
-  @database "projects/gele-b64ed/databases/(default)"
+  # @database "projects/gele-b64ed/databases/(default)"
+  @database "projects/firestore-37c38/databases/(default)"
   @parent "#{@database}/documents"
   @scopes ["https://www.googleapis.com/auth/cloud-platform", "https://www.googleapis.com/auth/datastore"]
+  @page_size 400
 
   defp get_token do
     @scopes
@@ -34,7 +36,7 @@ defmodule Firestore do
   def list_collection_ids(channel) do
     request = V1.ListCollectionIdsRequest.new(
       parent: @parent,
-      page_size: 10
+      page_size: @page_size
     )
 
     V1.Firestore.Stub.list_collection_ids(channel, request, content_type: "application/grpc")
@@ -74,7 +76,7 @@ defmodule Firestore do
   def do_list_documents(channel, collection, next_page_token \\ nil) do
     request = V1.ListDocumentsRequest.new(
       parent: @parent,
-      page_size: 2,
+      page_size: @page_size,
       collection_id: collection,
       page_token: next_page_token
     )
@@ -127,16 +129,16 @@ defmodule Firestore do
   def hello do
     {:ok, channel} = create_channel()
 
-    {:ok, reply} = list_collection_ids(channel)
-    IO.inspect(reply, label: "Collection IDs")
+    # {:ok, reply} = list_collection_ids(channel)
+    # IO.inspect(reply, label: "Collection IDs")
 
     # {:ok, reply} = list_documents(channel, "vehicles")
     # IO.inspect(reply, label: "Documents")
 
-    list_documents(channel, "vehicles")
-    |> Enum.into([])
-    |> IO.inspect
-    |> Enum.count
+    # list_documents(channel, "vehicles")
+    # |> Enum.into([])
+    # |> IO.inspect
+    # |> Enum.count
 
     # reply.documents
     # |> Enum.count
@@ -144,19 +146,19 @@ defmodule Firestore do
     # # List.last(reply.documents)
     # |> IO.inspect
 
-    # Enum.each(0..10, fn _ ->
-    #   uuid = UUID.uuid1()
+    Enum.each(0..10000, fn _ ->
+      uuid = UUID.uuid1()
 
-    #   value = V1.Value.new(
-    #     value_type: {:string_value, uuid}
-    #   )
+      value = V1.Value.new(
+        value_type: {:string_value, uuid}
+      )
 
-    #   document = V1.Document.new(
-    #     fields: %{"name" => value} 
-    #   )
+      document = V1.Document.new(
+        fields: %{"name" => value} 
+      )
 
-    #   create_document(channel, "vehicles", document)
-    # end)
+      create_document(channel, "vehicles", document)
+    end)
 
     # listen(channel)
 
