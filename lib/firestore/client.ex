@@ -9,7 +9,7 @@ defmodule Firestore.Client do
     "https://www.googleapis.com/auth/cloud-platform",
     "https://www.googleapis.com/auth/datastore"
   ]
-  @page_size 400
+  @page_size 1000
 
   @doc """
     https://firebase.google.com/docs/firestore/reference/rpc/google.firestore.v1#google.firestore.v1.Firestore.ListCollectionIds
