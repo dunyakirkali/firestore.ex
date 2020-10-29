@@ -2,7 +2,6 @@ defmodule Firestore.Client do
   alias Goth.Token
   alias Google.Firestore.V1
 
-  # @database "projects/gele-b64ed/databases/(default)"
   @database "projects/firestore-37c38/databases/(default)"
   @parent "#{@database}/documents"
   @scopes [
