@@ -25,7 +25,6 @@ defmodule Firestore.MixProject do
       {:protobuf, "~> 0.7.1"},
       {:google_protos, "~> 0.1"},
       {:grpc, github: "elixir-grpc/grpc"},
-      {:cowlib, "~> 2.9.0", override: true},
       {:elixir_uuid, "~> 1.2"}
     ]
   end
