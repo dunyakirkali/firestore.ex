@@ -7,9 +7,10 @@ defmodule Firestore do
     {:ok, reply} = Client.list_collection_ids(channel)
     IO.inspect(reply, label: "Collection IDs")
 
-    # list_documents(channel, "vehicles")
-    # |> Enum.into([])
-    # |> IO.inspect
+    Client.list_documents(channel, "countries")
+    |> Stream.into([])
+    # |> Enum.take(1)
+    |> Enum.into([])
     # |> Enum.count
 
     # Enum.each(0..36000, fn index ->
@@ -21,7 +22,7 @@ defmodule Firestore do
     #   )
 
     #   document = V1.Document.new(
-    #     fields: %{"name" => value} 
+    #     fields: %{"name" => value}
     #   )
 
     #   create_document(channel, "vehicles", document)
