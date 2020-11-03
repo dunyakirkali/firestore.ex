@@ -128,7 +128,7 @@ defmodule Firestore.Client do
     |> Token.for_scope()
   end
 
-  def create_channel do
+  def connect do
     {:ok, token} = get_token()
 
     # Read CA certificate for certificate pinning

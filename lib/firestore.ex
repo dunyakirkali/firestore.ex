@@ -2,7 +2,7 @@ defmodule Firestore do
   alias Firestore.Client
 
   def hello do
-    {:ok, channel} = Client.create_channel()
+    {:ok, channel} = Client.connect()
 
     {:ok, reply} = Client.list_collection_ids(channel)
     IO.inspect(reply, label: "Collection IDs")
