@@ -148,4 +148,8 @@ defmodule Firestore.Client do
     # Create the client
     GRPC.Stub.connect("firestore.googleapis.com:443", opts)
   end
+
+  def disconnect(channel) do
+    GRPC.Stub.disconnect(channel)
+  end
 end

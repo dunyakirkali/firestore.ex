@@ -29,5 +29,7 @@ defmodule Firestore do
     # end)
 
     # listen(channel)
+
+    Client.disconnect(channel)
   end
 end
